@@ -1,5 +1,6 @@
 package com.rison.bigdata.application.ods;
 
+import com.rison.bigdata.utils.KafkaUtil;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
@@ -45,6 +46,9 @@ public class OdsDataApplication {
         DataStreamSource<String> dataStreamSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "MySQL Source");
         dataStreamSource.setParallelism(1)
                 .print().setParallelism(1);
+
+
+        dataStreamSource.addSink(KafkaUtil.getFlinkKafkaProducer("ODS_DATA_TOPIC"));
 
         env.execute("ods_data");
 
